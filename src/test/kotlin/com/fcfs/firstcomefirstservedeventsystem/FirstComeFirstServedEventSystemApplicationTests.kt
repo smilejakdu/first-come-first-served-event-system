@@ -9,5 +9,4 @@ class FirstComeFirstServedEventSystemApplicationTests {
     @Test
     fun contextLoads() {
     }
-
 }
