@@ -29,7 +29,6 @@ class ApplyServiceTest {
 
     @Test
     @DisplayName("여러 명 응모")
-    @Throws(InterruptedException::class)
     fun multipleApplications() {
         val threadCount = 1000
         val executorService: ExecutorService = Executors.newFixedThreadPool(32)
