@@ -164,3 +164,32 @@ services:
 docker-compose up -d
 docker ps
 ```
+
+### kafka
+The basic structure of Kafka is  
+It consists of Producer, Topic, and Consumer.  
+Topic is similar to Queue.  
+And the producer inserts data into the topic.  
+The Consumer is the one that takes the data inserted into the Topic.  
+
+So, Kafka is a platform that helps stream data from producer to consumer to its destination in real time.  
+
+create topic
+```shell
+docker exec -it kafka kafka-topics.sh --bootstrap-server localhost:9092 --create --topic testTopic
+```
+run producer
+```shell
+docker exec -it kafka kafka-console-producer.sh --topic testTopic --broker-list 0.0.0.0:9092
+```
+run consumer
+```shell
+docker exec -it kafka kafka-console-consumer.sh --topic testTopic --bootstrap-server localhost:9092
+```
+
+after running the producer, you can see the message in the consumer.
+```shell
+> hello
+
+hello
+```
