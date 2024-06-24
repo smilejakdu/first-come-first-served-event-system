@@ -193,3 +193,120 @@ after running the producer, you can see the message in the consumer.
 
 hello
 ```
+
+## Requirements Three
+
+> config > KafkaProducerConfig.kt
+```kotlin
+@Configuration
+class KafkaProducerConfig {
+
+    @Bean
+    fun producerFactory(): ProducerFactory<String, Long> {
+        val config = hashMapOf<String, Any>(
+            ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to "localhost:9092",
+            ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
+            ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to LongSerializer::class.java
+        )
+        return DefaultKafkaProducerFactory(config)
+    }
+
+    @Bean
+    fun kafkaTemplate(): KafkaTemplate<String, Long> {
+        return KafkaTemplate(producerFactory())
+    }
+}
+```
+
+> producer > KafkaProducer.kt
+```kotlin
+@Component
+class CouponCreateProducer(
+    private val kafkaTemplate: KafkaTemplate<String, Long>
+) {
+
+    fun create(userId: Long) {
+        kafkaTemplate.send("coupon_create", userId)
+    }
+}
+```
+
+> service > ApplyService.kt
+```kotlin
+@Service
+class ApplyService(
+    private val couponRepository: CouponRepository,
+    private val couponCountRepository: CouponCountRepository,
+    private val couponCreateProducer: CouponCreateProducer
+) {
+
+    fun apply(userId: Long) {
+//        val cnt = couponRepository.count()
+        val cnt = couponCountRepository.increment()!!
+        if (cnt > 100) {
+            return
+        }
+        couponCreateProducer.create(userId)
+//        return couponRepository.save(Coupon(userId))
+    }
+}
+```
+
+consumer > CouponCreatedConsumer.kt
+```kotlin
+@Component
+class CouponCreatedConsumer(
+    private val couponRepository: CouponRepository,
+) {
+
+    @KafkaListener(topics = ["coupon_create"], groupId = "group_1")
+    fun listener(userId: Long) {
+        println("userId: $userId")
+    }
+}
+```
+
+create topic
+```shell
+docker exec -it kafka kafka-topics.sh --bootstrap-server localhost:9092 --create --topic coupon_create
+```
+
+topic list
+```shell
+docker exec -it kafka kafka-topics.sh --bootstrap-server localhost:9092 --list
+```
+
+remove topic
+```shell
+docker exec -it kafka kafka-topics.sh --bootstrap-server localhost:9092 --delete --topic coupon_create
+```
+
+run producer
+```shell
+docker exec -it kafka kafka-console-producer.sh --topic testTopic --broker-list 0.0.0.0:9092
+```
+
+run consumer
+```shell
+docker exec -it kafka kafka-console-consumer.sh --topic coupon_create --bootstrap-server localhost:9092 --key-deserializer "org.apache.kafka.common.serialization.StringDeserializer" --value-deserializer "org.apache.kafka.common.serialization.LongDeserializer"
+```
+
+If you execute as above, a print will be taken.
+```markdown
+2024-06-24T18:19:14.490+09:00  INFO 42384 --- [ntainer#0-0-C-1] o.s.k.l.KafkaMessageListenerContainer    : group_1: partitions assigned: [coupon_create-0]
+userId: 23
+userId: 28
+userId: 3
+userId: 21
+userId: 17
+userId: 9
+userId: 31
+userId: 13
+userId: 29
+userId: 10
+userId: 20
+userId: 2
+userId: 12
+
+....
+```
