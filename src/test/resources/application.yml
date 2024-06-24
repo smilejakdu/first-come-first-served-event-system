@@ -1,0 +1,42 @@
+server:
+  port: 8000
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: password
+  jpa:
+    hibernate:
+      ddl-auto: create-drop  # 테스트마다 스키마를 새로 생성하고 테스트 종료 시 삭제
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  cache:
+    type: redis
+    redis:
+      host: localhost
+      port: 6379
+  h2:
+    console:
+      enabled: true
+
+  jackson:
+    serialization:
+      indent_output: true
+
+logging:
+  level:
+    root: INFO
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+jwt:
+  secret: your-secret-key
+  expires: 86400000
