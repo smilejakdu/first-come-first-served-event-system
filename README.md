@@ -310,3 +310,16 @@ userId: 12
 
 ....
 ```
+
+
+# Conclusion
+```markdown
+resolves race condition for issuing 100 items due to redis single-threaded nature  
+however load may occur on DB throughput when inserting  
+through kafka middleware, 100 coupon storage events can be stored and the consumer can take them out  
+and process them when desired, thereby distributing the processing load.  
+you don't have to issue coupons right away, so if events are well issued in Kafka, you can take them out  
+and save them in the early morning when db workload is less.
+
+You don't have to issue coupons right away, so you can take them out and save them when DB workload is low. though kafka
+```
