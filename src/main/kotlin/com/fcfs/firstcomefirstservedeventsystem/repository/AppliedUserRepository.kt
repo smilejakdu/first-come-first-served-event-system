@@ -5,7 +5,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 class AppliedUserRepository(
-    private val redisTemplate: RedisTemplate<String, String>
+    private val redisTemplate: RedisTemplate<String, Any>
 ) {
 
     fun add(userId: Long)=

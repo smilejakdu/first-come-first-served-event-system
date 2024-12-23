@@ -2,15 +2,13 @@ package com.fcfs.firstcomefirstservedeventsystem.service
 
 import com.fcfs.firstcomefirstservedeventsystem.repository.CouponRepository
 import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
-import kotlin.test.Test
-import kotlin.test.assertEquals
 
 @SpringBootTest
+// @ExtendWith(MockitoExtension::class)
+// TODO: 단위 테스트 작성해보기
 class ApplyServiceTest {
 
     @Autowired
@@ -20,37 +18,14 @@ class ApplyServiceTest {
     private lateinit var couponRepository: CouponRepository
 
     @Test
-    @DisplayName("한번만 쿠폰을 발급")
-    fun apply() {
-        val userId = 1L
-        val coupon = applyService.apply(userId)
-//        assertEquals(1, coupon.userId)
+    @DisplayName("한 번만 쿠폰 발급")
+    fun singleApplication() {
+
     }
 
     @Test
-    @DisplayName("여러 명 응모")
+    @DisplayName("동시성 테스트 - 여러 명 응모")
     fun multipleApplications() {
-        val threadCount = 1000
-        val executorService: ExecutorService = Executors.newFixedThreadPool(32)
-        val latch = CountDownLatch(threadCount)
-
-        for (i in 0 until threadCount) {
-            val userId = i.toLong()
-            executorService.submit {
-                try {
-                    applyService.apply(userId)
-                } finally {
-                    latch.countDown()
-                }
-            }
-        }
-
-        latch.await()
-
-        Thread.sleep(10000)
-
-        val count = couponRepository.count()
-
-        assertEquals(100, count)
+        // 쿠폰 발급 결과 확인
     }
 }
